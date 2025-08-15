@@ -1,1 +1,15 @@
-spring.application.name=encryption-microservices-encryption-service
+server:
+  port: 8082
+
+spring:
+  application:
+    name: encryption-service
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/encryptiondb
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
