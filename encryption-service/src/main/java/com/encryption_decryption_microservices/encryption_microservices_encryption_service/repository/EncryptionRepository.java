@@ -1,0 +1,7 @@
+package com.encryption_decryption_microservices.encryption_microservices_encryption_service.repository;
+
+import com.encryption_decryption_microservices.encryption_microservices_encryption_service.entity.EncryptionRecord;
+import org.springframework.data.mongodb.repository.MongoRepository;
+
+public interface EncryptionRepository extends MongoRepository <EncryptionRecord, String>{
+}

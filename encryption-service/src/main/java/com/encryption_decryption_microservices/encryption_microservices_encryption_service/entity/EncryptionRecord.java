@@ -7,7 +7,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.lang.annotation.Inherited;
 import java.time.LocalDateTime;
 
 @Document(collection = "encryption_records")
@@ -15,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EncryptionRecord {
-    
+
     @Id
     private String id;
 
