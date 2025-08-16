@@ -6,6 +6,7 @@
     <file url="file://$PROJECT_DIR$/encryption-microservices-encryption-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/encryption-microservices-user-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/encryption-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/eurekaserver/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/user-service/src/main/java" charset="UTF-8" />
   </component>
 </project>
