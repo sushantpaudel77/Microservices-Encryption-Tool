@@ -23,11 +23,11 @@ public class UserService {
         }
 
         User user = new User();
-        user.setName(createUserDto.getUsername());
+        user.setUsername(createUserDto.getUsername());
         user.setEmail(createUserDto.getEmail());
 
         User saveduser = userRepository.save(user);
-        log.info("User created: {}", saveduser.getName());
+        log.info("User created: {}", saveduser.getUsername());
 
         return mapToUserDto(saveduser);
     }
@@ -40,13 +40,14 @@ public class UserService {
 
     public UserDto getUserByUsername(String username) {
         return userRepository.findByUsername(username)
-
+                .map(this::mapToUserDto)
+                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
     }
 
     private UserDto mapToUserDto(User user) {
         return new UserDto(
                 user.getId(),
-                user.getName(),
+                user.getUsername(),
                 user.getEmail(),
                 user.getCreatedAt()
         );
