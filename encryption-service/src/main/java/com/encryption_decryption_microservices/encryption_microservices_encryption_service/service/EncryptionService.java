@@ -1,9 +1,7 @@
 package com.encryption_decryption_microservices.encryption_microservices_encryption_service.service;
 
 import com.encryption_decryption_microservices.encryption_microservices_encryption_service.clients.UserServiceClient;
-import com.encryption_decryption_microservices.encryption_microservices_encryption_service.dto.EncryptionRequestDto;
-import com.encryption_decryption_microservices.encryption_microservices_encryption_service.dto.EncryptionResponseDto;
-import com.encryption_decryption_microservices.encryption_microservices_encryption_service.dto.UserDto;
+import com.encryption_decryption_microservices.encryption_microservices_encryption_service.dto.*;
 import com.encryption_decryption_microservices.encryption_microservices_encryption_service.entity.EncryptionRecord;
 import com.encryption_decryption_microservices.encryption_microservices_encryption_service.repository.EncryptionRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,9 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 @Service
@@ -38,11 +34,34 @@ public class EncryptionService {
         String encryptedText;
 
         try {
-            switch (encryptionRequestDto.getAlgorithm().toUpperCase()) {
-                case "AES":
-                    encryptedText = encryptAES(encryptionRequestDto.getText());
-            }
+            encryptedText = switch (encryptionRequestDto.getAlgorithm().toUpperCase()) {
+                case "AES" -> encryptAES(encryptionRequestDto.getText());
+                case "BASE64" -> encryptBase64(encryptionRequestDto.getText());
+                default -> throw new RuntimeException("Invalid algorithm: " + encryptionRequestDto.getAlgorithm());
+            };
+        } catch (Exception e) {
+            throw new RuntimeException("Error encrypting text: " + e.getMessage());
         }
+
+        EncryptionRecord record = new EncryptionRecord(encryptionRequestDto.getUserId(), encryptionRequestDto.getText(), encryptedText, encryptionRequestDto.getAlgorithm());
+
+        EncryptionRecord savedRecord = encryptionRepository.save(record);
+        return convertToEncryptionResponseDto(savedRecord);
+    }
+
+    public DecryptionResponseDto decryptionText(DecryptionRequestDto decryptionRequestDto) {
+        String decryptedText;
+
+        try {
+            decryptedText = switch (decryptionRequestDto.getAlgorithm().toUpperCase()) {
+                case "AES" -> decryptAES(decryptionRequestDto.getEncryptedText());
+                case "BASE64" -> decryptBase64(decryptionRequestDto.getEncryptedText());
+                default -> throw new RuntimeException("Invalid algorithm: " + decryptionRequestDto.getAlgorithm());
+            };
+        } catch (Exception e) {
+            throw new RuntimeException("Error decrypting text: " + e.getMessage());
+        }
+        return new DecryptionResponseDto(decryptedText, decryptionRequestDto.getAlgorithm().toUpperCase());
     }
 
     private String encryptAES(String plainText) throws Exception {
@@ -66,8 +85,8 @@ public class EncryptionService {
     }
 
     private String decryptBase64(String plainText) {
-       byte[] decodedBytes = Base64.getDecoder().decode(plainText);
-       return new String(decodedBytes);
+        byte[] decodedBytes = Base64.getDecoder().decode(plainText);
+        return new String(decodedBytes);
     }
 
     private EncryptionResponseDto convertToEncryptionResponseDto(EncryptionRecord record) {
