@@ -8,10 +8,9 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="eurekaserver" />
-        <module name="encryption-microservices-user-service" />
         <module name="encryption-microservices-api-gateway" />
       </profile>
-      <profile name="Annotation profile for encryption-microservices-user-service" enabled="true">
+      <profile name="Annotation profile for encryption-microservices-encryption-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -19,6 +18,7 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
         </processorPath>
         <module name="encryption-microservices-encryption-service" />
+        <module name="encryption-microservices-user-service" />
       </profile>
     </annotationProcessing>
   </component>
