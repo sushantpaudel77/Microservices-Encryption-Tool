@@ -3,11 +3,14 @@ package com.encryption_decryption_microservices.encryption_microservices_user_se
 import com.encryption_decryption_microservices.encryption_microservices_user_service.clients.EncryptionServiceClient;
 import com.encryption_decryption_microservices.encryption_microservices_user_service.dto.CreateUserDto;
 import com.encryption_decryption_microservices.encryption_microservices_user_service.dto.UserDto;
+import com.encryption_decryption_microservices.encryption_microservices_user_service.dto.UserWithHistoryDto;
 import com.encryption_decryption_microservices.encryption_microservices_user_service.entity.User;
 import com.encryption_decryption_microservices.encryption_microservices_user_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +45,32 @@ public class UserService {
         return userRepository.findByUsername(username)
                 .map(this::mapToUserDto)
                 .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+    }
+
+    public List<UserDto> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(this::mapToUserDto)
+                .toList();
+    }
+
+    public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new RuntimeException("User not found with id: " + id);
+        }
+        userRepository.deleteById(id);
+        log.info("User deleted with id: {}", id);
+    }
+
+    // Get user with their encryption history using Feign Client
+    public UserWithHistoryDto getUserWithHistory(Long id) {
+        UserDto userDto = getUserById(id);
+         try {
+             var encryptionHistory = encryptionServiceClient.getUserEncryptionHistory(id);
+             return new UserWithHistoryDto(userDto, encryptionHistory);
+         } catch (Exception e) {
+             log.error("Error getting user encryption history: {}", e.getMessage());
+             return new UserWithHistoryDto(userDto, List.of());
+         }
     }
 
     private UserDto mapToUserDto(User user) {

@@ -10,6 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserWithHistoryDto {
+    // UserWithHistoryDto.java
     private UserDto user;
     private List<EncryptionResponseDto> encryptionHistory;
 }
