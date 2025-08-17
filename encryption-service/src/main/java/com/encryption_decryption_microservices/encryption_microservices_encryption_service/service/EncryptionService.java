@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface EncryptionService {
     EncryptionResponseDto encryptText(EncryptionRequestDto request);
-    DecryptionResponseDto decryptionText(DecryptionRequestDto request);
+    DecryptionResponseDto decryptText(DecryptionRequestDto request);
     List<EncryptionResponseDto> getUserHistory(Long userId);
 }

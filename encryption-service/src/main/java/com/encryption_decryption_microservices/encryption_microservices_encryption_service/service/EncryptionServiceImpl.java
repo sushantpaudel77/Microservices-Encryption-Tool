@@ -57,7 +57,7 @@ public class EncryptionServiceImpl implements EncryptionService{
     }
 
     @Override
-    public DecryptionResponseDto decryptionText(DecryptionRequestDto request) {
+    public DecryptionResponseDto decryptText(DecryptionRequestDto request) {
         String decryptedText;
 
         try {
