@@ -24,3 +24,8 @@ eureka:
   instance:
     preferIpAddress: true
     instance-id: ${spring.application.name}:${server.port}
+
+logging:
+  level:
+    com.yourpackage.UserServiceClient: DEBUG
+    org.springframework.cloud.openfeign: DEBUG

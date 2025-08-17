@@ -10,13 +10,14 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class EncryptionServiceImpl implements EncryptionService{
+public class EncryptionServiceImpl implements EncryptionService {
 
     private final EncryptionRepository encryptionRepository;
     private final UserServiceClient userServiceClient;
@@ -26,6 +27,20 @@ public class EncryptionServiceImpl implements EncryptionService{
 
     @Override
     public EncryptionResponseDto encryptText(EncryptionRequestDto request) {
+        // Basic validation
+        if (request == null) {
+            throw new RuntimeException("Encryption failed: request body is required");
+        }
+        if (request.getUserId() == null) {
+            throw new RuntimeException("Encryption failed: userId is required");
+        }
+        if (request.getAlgorithm() == null || request.getAlgorithm().trim().isEmpty()) {
+            throw new RuntimeException("Encryption failed: algorithm is required");
+        }
+        if (request.getText() == null) {
+            throw new RuntimeException("Encryption failed: text is required");
+        }
+
         try {
             UserDto user = userServiceClient.getUserById(request.getUserId());
             log.info("Encrypting text for user: {}", user.getUsername());
@@ -34,9 +49,10 @@ public class EncryptionServiceImpl implements EncryptionService{
         }
 
         String encryptedText;
+        String algorithm = request.getAlgorithm().toUpperCase();
 
         try {
-            encryptedText = switch (request.getAlgorithm().toUpperCase()) {
+            encryptedText = switch (algorithm) {
                 case "AES" -> encryptAES(request.getText());
                 case "BASE64" -> encryptBase64(request.getText());
                 default -> throw new IllegalArgumentException("Unsupported algorithm: " + request.getAlgorithm());
@@ -58,10 +74,21 @@ public class EncryptionServiceImpl implements EncryptionService{
 
     @Override
     public DecryptionResponseDto decryptText(DecryptionRequestDto request) {
-        String decryptedText;
+        // Basic validation
+        if (request == null) {
+            throw new RuntimeException("Decryption failed: request body is required");
+        }
+        if (request.getAlgorithm() == null || request.getAlgorithm().trim().isEmpty()) {
+            throw new RuntimeException("Decryption failed: algorithm is required");
+        }
+        if (request.getEncryptedText() == null || request.getEncryptedText().isEmpty()) {
+            throw new RuntimeException("Decryption failed: encryptedText is required");
+        }
 
+        String decryptedText;
+        String algorithm = request.getAlgorithm().toUpperCase();
         try {
-            decryptedText = switch (request.getAlgorithm().toUpperCase()) {
+            decryptedText = switch (algorithm) {
                 case "AES" -> decryptAES(request.getEncryptedText());
                 case "BASE64" -> decryptBase64(request.getEncryptedText());
                 default -> throw new IllegalArgumentException("Unsupported algorithm: " + request.getAlgorithm());
@@ -69,23 +96,23 @@ public class EncryptionServiceImpl implements EncryptionService{
         } catch (Exception e) {
             throw new RuntimeException("Decryption failed: " + e.getMessage());
         }
-
-        return new DecryptionResponseDto(decryptedText, request.getAlgorithm().toUpperCase());
+        return new DecryptionResponseDto(decryptedText, algorithm);
     }
+
 
     @Override
     public List<EncryptionResponseDto> getUserHistory(Long userId) {
-       try {
-           UserDto user = userServiceClient.getUserById(userId);
-           log.info("Fetching user history for user: {}", user.getUsername());
-       } catch (Exception e) {
-           throw new RuntimeException("User not found with id: " + userId);
-       }
+        try {
+            UserDto user = userServiceClient.getUserById(userId);
+            log.info("Fetching user history for user: {}", user.getUsername());
+        } catch (Exception e) {
+            throw new RuntimeException("User not found with id: " + userId);
+        }
 
-       return encryptionRepository.findByUserIdOrderByCreatedAtDesc(userId)
-               .stream()
-               .map(this::mapToResponseDto)
-               .toList();
+        return encryptionRepository.findByUserIdOrderByCreatedAtDesc(userId)
+                .stream()
+                .map(this::mapToResponseDto)
+                .toList();
     }
 
     private String encryptAES(String plainText) throws Exception {
@@ -111,7 +138,7 @@ public class EncryptionServiceImpl implements EncryptionService{
 
     private String decryptBase64(String encryptedText) {
         byte[] decodedBytes = Base64.getDecoder().decode(encryptedText);
-        return new String(decodedBytes);
+        return new String(decodedBytes, StandardCharsets.UTF_8);
     }
 
     private EncryptionResponseDto mapToResponseDto(EncryptionRecord record) {
