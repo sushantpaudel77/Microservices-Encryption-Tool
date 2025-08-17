@@ -20,3 +20,26 @@ A full-stack application demonstrating microservices architecture with Spring Bo
 
 ## ✨ Features
 
+### Backend Features
+- **Microservices Architecture** with service isolation
+- **API Gateway** for centralized routing and CORS handling
+- **Multiple Database Support** (PostgreSQL + MongoDB)
+- **Inter-service Communication** using OpenFeign clients
+- **Encryption Algorithms** (AES, Base64 encoding)
+- **User Management** with PostgreSQL persistence
+- **Encryption History** tracking with MongoDB
+- **Global Exception Handling** with proper error responses
+- **Health Check Endpoints** for monitoring
+- **Logging** and error tracking
+
+### Frontend Features
+- **Modern React** application with hooks
+- **Tailwind CSS** for responsive styling
+- **Real-time Encryption/Decryption** interface
+- **User Management** with CRUD operations
+- **Encryption History** visualization
+- **Multi-algorithm Support** selection
+- **Responsive Design** for all devices
+
+## 🏗️ Architecture
+
