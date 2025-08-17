@@ -496,3 +496,60 @@ docker-compose -f docker-compose.prod.yml up -d
 - **Load Balancing**: Multiple service instances can be deployed
 - **Circuit Breaker**: Can be added to Feign clients for resilience
 
+## 🔒 Security
+
+### Current Implementation
+- **CORS Configuration**: Handled by API Gateway
+- **Input Validation**: Basic validation in DTOs
+- **Error Handling**: No sensitive information in error responses
+
+### Production Recommendations
+- Add Spring Security for authentication
+- Implement JWT tokens for authorization  
+- Use proper encryption key management
+- Add rate limiting and request validation
+- Implement audit logging
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Code Style
+- Follow Spring Boot best practices
+- Use Lombok for reducing boilerplate
+- Implement proper exception handling
+- Add meaningful comments for complex logic
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙋‍♂️ Support
+
+If you have any questions or run into issues:
+
+1. Check the [Troubleshooting](#troubleshooting) section
+2. Review the [Issues](https://github.com/your-username/encryption-microservices/issues) page
+3. Create a new issue with detailed information
+4. Contact the maintainers
+
+## 🎯 Learning Objectives
+
+This project demonstrates:
+- ✅ Microservices architecture patterns
+- ✅ Inter-service communication with OpenFeign
+- ✅ Polyglot persistence (PostgreSQL + MongoDB)
+- ✅ API Gateway implementation
+- ✅ Modern React development
+- ✅ Docker containerization
+- ✅ RESTful API design
+- ✅ Error handling strategies
+- ✅ Logging and monitoring
+
+---
+
+**Built with ❤️ for learning microservices architecture**
