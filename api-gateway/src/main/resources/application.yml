@@ -19,13 +19,14 @@ spring:
               predicates:
                 - Path=/api/users/**
               filters:
-                - StripPrefix=2
+                - StripPrefix=1
+
             - id: encryption-service
               uri: lb://encryption-service
               predicates:
                 - Path=/api/encryption/**
               filters:
-                - StripPrefix=2
+                - StripPrefix=1
           globalcors:
             cors-configurations:
               '[/**]':
@@ -47,6 +48,7 @@ eureka:
       defaultZone: http://localhost:8070/eureka/
   instance:
     preferIpAddress: true
+    instance-id: ${spring.application.name}:${server.port}
 
 management:
   endpoints:

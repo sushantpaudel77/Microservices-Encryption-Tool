@@ -9,5 +9,4 @@ public class EncryptionMicroservicesApiGatewayApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(EncryptionMicroservicesApiGatewayApplication.class, args);
 	}
-
 }
