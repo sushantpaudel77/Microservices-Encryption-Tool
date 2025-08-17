@@ -5,7 +5,10 @@ import com.encryption_decryption_microservices.encryption_microservices_encrypti
 import com.encryption_decryption_microservices.encryption_microservices_encryption_service.dto.EncryptionRequestDto;
 import com.encryption_decryption_microservices.encryption_microservices_encryption_service.dto.EncryptionResponseDto;
 
+import java.util.List;
+
 public interface EncryptionService {
-    EncryptionResponseDto encryptText(EncryptionRequestDto encryptionRequestDto);
-    DecryptionResponseDto decryptionText(DecryptionRequestDto decryptionRequestDto);
+    EncryptionResponseDto encryptText(EncryptionRequestDto request);
+    DecryptionResponseDto decryptionText(DecryptionRequestDto request);
+    List<EncryptionResponseDto> getUserHistory(Long userId);
 }

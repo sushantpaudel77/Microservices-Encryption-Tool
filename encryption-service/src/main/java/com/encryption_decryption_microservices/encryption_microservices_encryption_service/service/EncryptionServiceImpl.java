@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,88 +21,100 @@ public class EncryptionServiceImpl implements EncryptionService{
     private final EncryptionRepository encryptionRepository;
     private final UserServiceClient userServiceClient;
 
-    private final String AES_KEY = "my_secret_key";
+    private final String AES_KEY = "MySecretKey12345";
+
 
     @Override
-    public EncryptionResponseDto encryptText(EncryptionRequestDto encryptionRequestDto) {
-        verifyUserExists(encryptionRequestDto.getUserId());
+    public EncryptionResponseDto encryptText(EncryptionRequestDto request) {
+        try {
+            UserDto user = userServiceClient.getUserById(request.getUserId());
+            log.info("Encrypting text for user: {}", user.getUsername());
+        } catch (Exception e) {
+            throw new RuntimeException("User not found with id: " + request.getUserId());
+        }
 
-        String encryptedText = encryptByAlgorithm(encryptionRequestDto.getText(), encryptionRequestDto.getAlgorithm());
+        String encryptedText;
+
+        try {
+            encryptedText = switch (request.getAlgorithm().toUpperCase()) {
+                case "AES" -> encryptAES(request.getText());
+                case "BASE64" -> encryptBase64(request.getText());
+                default -> throw new IllegalArgumentException("Unsupported algorithm: " + request.getAlgorithm());
+            };
+        } catch (Exception e) {
+            throw new RuntimeException("Encryption failed: " + e.getMessage());
+        }
 
         EncryptionRecord record = new EncryptionRecord(
-                encryptionRequestDto.getUserId(),
-                encryptionRequestDto.getText(),
+                request.getUserId(),
+                request.getText(),
                 encryptedText,
-                encryptionRequestDto.getAlgorithm()
+                request.getAlgorithm().toUpperCase()
         );
 
-        EncryptionRecord savedRecord = encryptionRepository.save(record);
-        return convertToEncryptionResponseDto(savedRecord);
+        EncryptionRecord saved = encryptionRepository.save(record);
+        return mapToResponseDto(saved);
     }
 
     @Override
-    public DecryptionResponseDto decryptionText(DecryptionRequestDto decryptionRequestDto) {
-        String decryptedText = decryptByAlgorithm(decryptionRequestDto.getEncryptedText(), decryptionRequestDto.getAlgorithm());
-        return new DecryptionResponseDto(decryptedText, decryptionRequestDto.getAlgorithm().toUpperCase());
-    }
-    private void verifyUserExists(Long userId) {
-        try {
-            UserDto userDto = userServiceClient.getUserById(userId);
-            log.info("Encrypting text for user: {}", userDto.getUsername());
-        } catch (Exception e) {
-            throw new RuntimeException("User not found with id: " + userId);
-        }
-    }
+    public DecryptionResponseDto decryptionText(DecryptionRequestDto request) {
+        String decryptedText;
 
-    private String encryptByAlgorithm(String text, String algorithm) {
         try {
-            return switch (algorithm.toUpperCase()) {
-                case "AES" -> encryptAES(text);
-                case "BASE64" -> encryptBase64(text);
-                default -> throw new RuntimeException("Invalid algorithm: " + algorithm);
+            decryptedText = switch (request.getAlgorithm().toUpperCase()) {
+                case "AES" -> decryptAES(request.getEncryptedText());
+                case "BASE64" -> decryptBase64(request.getEncryptedText());
+                default -> throw new IllegalArgumentException("Unsupported algorithm: " + request.getAlgorithm());
             };
         } catch (Exception e) {
-            throw new RuntimeException("Error encrypting text: " + e.getMessage());
+            throw new RuntimeException("Decryption failed: " + e.getMessage());
         }
+
+        return new DecryptionResponseDto(decryptedText, request.getAlgorithm().toUpperCase());
     }
 
-    private String decryptByAlgorithm(String text, String algorithm) {
-        try {
-            return switch (algorithm.toUpperCase()) {
-                case "AES" -> decryptAES(text);
-                case "BASE64" -> decryptBase64(text);
-                default -> throw new RuntimeException("Invalid algorithm: " + algorithm);
-            };
-        } catch (Exception e) {
-            throw new RuntimeException("Error decrypting text: " + e.getMessage());
-        }
+    @Override
+    public List<EncryptionResponseDto> getUserHistory(Long userId) {
+       try {
+           UserDto user = userServiceClient.getUserById(userId);
+           log.info("Fetching user history for user: {}", user.getUsername());
+       } catch (Exception e) {
+           throw new RuntimeException("User not found with id: " + userId);
+       }
+
+       return encryptionRepository.findByUserIdOrderByCreatedAtDesc(userId)
+               .stream()
+               .map(this::mapToResponseDto)
+               .toList();
     }
 
     private String encryptAES(String plainText) throws Exception {
         SecretKeySpec secretKey = new SecretKeySpec(AES_KEY.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-        byte[] encryptedByte = cipher.doFinal(plainText.getBytes());
-        return Base64.getEncoder().encodeToString(encryptedByte);
+        byte[] encryptedBytes = cipher.doFinal(plainText.getBytes());
+        return Base64.getEncoder().encodeToString(encryptedBytes);
     }
 
     private String decryptAES(String encryptedText) throws Exception {
         SecretKeySpec secretKey = new SecretKeySpec(AES_KEY.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.DECRYPT_MODE, secretKey);
-        byte[] decryptedByte = cipher.doFinal(Base64.getDecoder().decode(encryptedText));
-        return new String(decryptedByte);
+        byte[] decodedBytes = Base64.getDecoder().decode(encryptedText);
+        byte[] decryptedBytes = cipher.doFinal(decodedBytes);
+        return new String(decryptedBytes);
     }
 
     private String encryptBase64(String plainText) {
         return Base64.getEncoder().encodeToString(plainText.getBytes());
     }
 
-    private String decryptBase64(String encodedText) {
-        return new String(Base64.getDecoder().decode(encodedText));
+    private String decryptBase64(String encryptedText) {
+        byte[] decodedBytes = Base64.getDecoder().decode(encryptedText);
+        return new String(decodedBytes);
     }
 
-    private EncryptionResponseDto convertToEncryptionResponseDto(EncryptionRecord record) {
+    private EncryptionResponseDto mapToResponseDto(EncryptionRecord record) {
         return new EncryptionResponseDto(
                 record.getId(),
                 record.getUserId(),
