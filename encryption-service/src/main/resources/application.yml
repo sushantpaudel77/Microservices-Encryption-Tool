@@ -15,6 +15,7 @@ management:
       exposure:
         include: health,info
 
+eureka:
   client:
     registerWithEureka: true
     fetchRegistry: true
