@@ -5,6 +5,6 @@ import EncryptionApp from './EncryptionApp'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    <EncryptionApp />
   </StrictMode>,
 )

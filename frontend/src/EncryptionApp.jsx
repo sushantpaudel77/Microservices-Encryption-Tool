@@ -20,15 +20,19 @@ const EncryptionApp = () => {
     fetchUsers();
   }, []);
 
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch(`${API_BASE}/users`);
-      const data = await response.json();
-      setUsers(data);
-    } catch (error) {
-      console.error('Error fetching users:', error);
+const fetchUsers = async () => {
+  try {
+    const response = await fetch(`${API_BASE}/users`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  };
+    const data = await response.json();
+    setUsers(data);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+  }
+};
+
 
   const createUser = async () => {
     try {
