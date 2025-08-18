@@ -336,7 +336,7 @@ const fetchUsers = async () => {
 
         {/* Microservices Status */}
         <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">🏗️ Microservices Architecture</h2>
+          <h2 className="text-xl font-semibold mb-4">Microservices Architecture</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-4 bg-blue-50 rounded-lg">
               <h3 className="font-medium text-blue-800">API Gateway</h3>
